@@ -1,7 +1,7 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from './schema/users.schema';
-import { Model } from 'mongoose';
+import { FilterQuery, Model, UpdateQuery } from 'mongoose';
 import { hash } from 'bcryptjs';
 import { CreateUserDto } from './dto/craete-user.dto';
 
@@ -31,4 +31,21 @@ export class UsersService {
     const { password, _id, __v, ...res } = user.toObject();
     return res;
   }
+
+  async getUser(query: FilterQuery<User>) {
+    const user = (await this.userModel.findOne(query)).toObject();
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
+  }
+
+  async getUsers() {
+    return this.userModel.find({});
+  }
+
+  async updateUser(query: FilterQuery<User>, data: UpdateQuery<User>) {
+    return this.userModel.findOneAndUpdate(query, data);
+  }
+
 }
